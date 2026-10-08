@@ -16,10 +16,56 @@ document.querySelectorAll('.choices').forEach(group=>group.addEventListener('cli
 const spendInput=document.getElementById('spend');if(spendInput)spendInput.addEventListener('input',e=>{state.spend=+e.target.value;document.getElementById('spendValue').textContent='₹'+state.spend.toLocaleString('en-IN')});
 function triggerEvent(){state.event=events[Math.floor(Math.random()*events.length)];document.getElementById('eventTitle').textContent=state.event[0];document.getElementById('eventText').textContent=state.event[1];document.getElementById('adminEvent').textContent=state.event[0];toast('Disruption released.');}
 function submitDecision(){if(state.submitted){toast('Decision already locked for this round.');return}let base=0;if(state.choices.procurement==='aggressive')base+=5;if(state.choices.procurement==='conservative')base-=2;if(state.choices.transport==='speed')base+=4;if(state.choices.transport==='consolidate')base+=2;if(state.choices.quality==='strict')base+=4;if(state.choices.quality==='lenient')base-=3;let shock=state.event?Math.floor(Math.random()*8):0;let profit=7000+base*300-shock*250-state.spend*.35;state.cash=Math.max(0,state.cash+profit);state.trust=Math.max(0,Math.min(100,state.trust+(state.choices.quality==='strict'?2:-1)-(state.event?1:0)));let collected=2200+(state.choices.procurement==='aggressive'?300:state.choices.procurement==='conservative'?-150:0);let rejected=Math.max(20,Math.round(collected*(state.choices.quality==='strict'?.035:state.choices.quality==='lenient'?.09:.06)));let delivered=Math.min(2000,collected-rejected);state.ledger.push({round:state.round,collected,delivered,rejected,profit});state.submitted=true;render();document.getElementById('lockBtn').style.display='none';document.getElementById('nextRoundBtn').style.display='block';clearInterval(window.tick);toast('Decision locked. You can proceed immediately.');}
-function nextRound(){if(!state.submitted){toast('Lock your decision before proceeding.');return}if(state.round>=5){toast('Final round reached.');return}state.round++;state.submitted=false;state.event=null;document.getElementById('lockBtn').style.display='block';document.getElementById('nextRoundBtn').style.display='none';document.getElementById('eventTitle').textContent='No disruption yet';document.getElementById('eventText').textContent='Submit your operating plan. The environment will respond.';render();toast('Round '+String(state.round).padStart(2,'0')+' opened.');}
+function nextRound(){if(!state.submitted){toast('Lock your decision before proceeding.');return}if(state.round>=5){if(state.submitted)showFinalResults();else toast('Lock your final decision to see the results.');return}state.round++;state.submitted=false;state.event=null;document.getElementById('lockBtn').style.display='block';document.getElementById('nextRoundBtn').style.display='none';document.getElementById('eventTitle').textContent='No disruption yet';document.getElementById('eventText').textContent='Submit your operating plan. The environment will respond.';render();toast('Round '+String(state.round).padStart(2,'0')+' opened.');}
 function render(){const r=rounds[state.round-1];document.getElementById('roundEyebrow').textContent=r.eyebrow;document.getElementById('roundTitle').textContent=r.title;document.getElementById('briefTitle').textContent='Village cooperative · Period '+state.round;document.getElementById('briefText').textContent=r.brief;document.getElementById('cash').textContent='₹'+state.cash.toLocaleString('en-IN');document.getElementById('trust').textContent=Math.round(state.trust);document.getElementById('rank').textContent=state.round===1?'—':'TOP 30%';document.getElementById('adminRound').textContent=String(state.round).padStart(2,'0');document.getElementById('adminAlive').textContent=Math.max(1,12-(state.round-1)*3);document.getElementById('ledgerRows').innerHTML=state.ledger.map(x=>'<div class="ledger-row"><span>ROUND '+x.round+'</span><span>'+x.collected.toLocaleString()+' L</span><span>'+x.delivered.toLocaleString()+' L</span><span>'+x.rejected.toLocaleString()+' L</span><span>₹'+Math.round(x.profit).toLocaleString('en-IN')+'</span></div>').join('')}
 function startTimer(){let s=240;clearInterval(window.tick);document.getElementById('timer').textContent='04:00';window.tick=setInterval(()=>{s--;document.getElementById('timer').textContent=String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');if(s<=0){clearInterval(window.tick);if(!state.submitted){submitDecision();}}},1000)}
-function endGame(){clearInterval(window.tick);go('landing');toast('Simulation exited.')}
+
+function calculateFinalPerformance(){
+  const roundsDone=state.ledger.length;
+  const avgProfit=roundsDone?state.ledger.reduce((s,x)=>s+x.profit,0)/roundsDone:0;
+  const totalCollected=state.ledger.reduce((s,x)=>s+x.collected,0);
+  const totalDelivered=state.ledger.reduce((s,x)=>s+x.delivered,0);
+  const totalRejected=state.ledger.reduce((s,x)=>s+x.rejected,0);
+  const rejectionRate=totalCollected?totalRejected/totalCollected:0;
+  const deliveryRate=totalCollected?totalDelivered/totalCollected:0;
+  const operational=Math.max(0,Math.min(100,Math.round(100-(Math.max(0,2200*roundsDone-totalDelivered)/(2200*roundsDone||1))*35)));
+  const financial=Math.max(0,Math.min(100,Math.round(72+(avgProfit/7000)*20)));
+  const service=Math.max(0,Math.min(100,Math.round(deliveryRate*100)));
+  const quality=Math.max(0,Math.min(100,Math.round(100-rejectionRate*100*5)));
+  const farmer=Math.max(0,Math.min(100,Math.round(state.trust)));
+  const resilience=Math.max(0,Math.min(100,Math.round(78+(state.cash-100000)/2500+(state.trust-82)*.35)));
+  const metrics=[
+    ['Operational Efficiency',operational,25],
+    ['Financial Performance',financial,20],
+    ['Service Level',service,20],
+    ['Milk Quality',quality,15],
+    ['Farmer Satisfaction',farmer,10],
+    ['Resilience',resilience,10]
+  ];
+  const cpi=Math.round(metrics.reduce((s,m)=>s+m[1]*m[2]/100,0));
+  return {metrics,cpi,totalDelivered,farmer};
+}
+function showFinalResults(){
+  const result=calculateFinalPerformance();
+  document.getElementById('finalCpi').textContent=result.cpi;
+  document.getElementById('finalCash').textContent='₹'+Math.round(state.cash).toLocaleString('en-IN');
+  document.getElementById('finalDelivered').textContent=result.totalDelivered.toLocaleString('en-IN')+' L';
+  document.getElementById('finalTrust').textContent=result.farmer;
+  document.getElementById('resultsTitle').textContent=result.cpi>=85?'A strong operating finish.':result.cpi>=70?'A resilient finish under pressure.':'The system survived. The optimisation did not.';
+  document.getElementById('closureTitle').textContent=result.cpi>=85?'You kept the route moving.':result.cpi>=70?'You kept the cooperative alive.':'The cooperative made it to the boardroom.';
+  document.getElementById('performanceMetrics').innerHTML=result.metrics.map(m=>'<div class="perf-row"><div class="perf-name">'+m[0]+'</div><div class="perf-bar"><div class="perf-fill" style="width:'+m[1]+'%"></div></div><div class="perf-value">'+m[1]+' <span>/ 100</span></div></div>').join('');
+  const names=['Supply Chain Mavericks','Dairy Titans','Route Masters','Co-op Commanders','Milk Matrix','Rural Ops United','Chill Chain','Last Mile Legends'];
+  const scores=[96, result.cpi, 91, 87, 83, 79, 74, 69].filter((v,i)=>i!==1 || true);
+  const board=names.map((n,i)=>({name:n,score:i===1?result.cpi:scores[i]})).sort((a,b)=>b.score-a.score);
+  const currentRank=board.findIndex(x=>x.name==='Dairy Titans')+1;
+  const currentName=state.team;
+  const renamed=board.map(x=>x.name==='Dairy Titans'?currentName:x.name);
+  document.getElementById('leaderboardRows').innerHTML=board.map((x,i)=>'<div class="leader-row '+(x.name==='Dairy Titans'?'current':'')+'"><div class="leader-rank">#'+(i+1)+'</div><div class="leader-team">'+(x.name==='Dairy Titans'?currentName:x.name)+(x.name==='Dairy Titans'?'<span class="leader-note">YOUR TEAM</span>':'')+'</div><div class="leader-score">'+x.score+' CPI</div><div class="leader-status">'+(i===0?'CHAMPION':i<3?'FINALIST':'FINISHED')+'</div></div>').join('');
+  document.getElementById('rank').textContent='#'+currentRank;
+  go('results');
+}
+
+function endGame(){clearInterval(window.tick);if(state.round>=5 && state.submitted){showFinalResults();}else{go('landing');toast('Simulation exited.')}}
 function resetDemo(){location.reload()}
 function toast(t){const el=document.getElementById('toast');el.textContent=t;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2400)}
 render();
