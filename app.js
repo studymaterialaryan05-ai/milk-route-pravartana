@@ -1,4 +1,4 @@
-const CONFIG={SUPABASE_URL:'YOUR_SUPABASE_URL',SUPABASE_KEY:'YOUR_SUPABASE_PUBLISHABLE_KEY'};
+const CONFIG={SUPABASE_URL:'https://vxmlokpiihemptqsoptx.supabase.co',SUPABASE_KEY:'sb_publishable_FRHN8PgBm93xcgA4eM8EHw_iu48QLEr'};
 const isLive=()=>CONFIG.SUPABASE_URL.startsWith('https://')&&!CONFIG.SUPABASE_URL.includes('YOUR_')&&CONFIG.SUPABASE_KEY&&!CONFIG.SUPABASE_KEY.includes('YOUR_')&&window.supabase;
 const state={round:1,team:'DAIRY TITANS',members:'4 operators',cash:100000,trust:82,rank:'—',spend:5000,submitted:false,event:null,ledger:[],choices:{procurement:'balanced',transport:'balanced',quality:'balanced'},sessionId:null,teamId:null,sessionCode:'',role:'player',finalCpi:0};
 let db=null,sessionChannel=null,teamsChannel=null;
