@@ -64,6 +64,52 @@
       </div>
     </section>
 
+
+    <section id="results" class="screen">
+      <div class="results-shell">
+        <div class="results-hero">
+          <div>
+            <div class="eyebrow">SIMULATION COMPLETE · FINAL BOARDROOM</div>
+            <h2 id="resultsTitle">Cooperative performance review.</h2>
+            <p class="muted" id="resultsSubtitle">Five operating periods are complete. Here is how your cooperative performed against the theoretical optimum.</p>
+          </div>
+          <div class="final-score"><span>FINAL CPI</span><strong id="finalCpi">0</strong><small>/ 100</small></div>
+        </div>
+
+        <div class="results-grid">
+          <div class="results-card performance-card">
+            <div class="card-head"><div><span>01 · PERFORMANCE VS OPTIMUM</span><h3>Your operating scorecard</h3></div><span class="optimum-label">OPTIMUM = 100</span></div>
+            <div id="performanceMetrics" class="performance-metrics"></div>
+          </div>
+
+          <div class="results-card summary-card">
+            <span>FINAL OPERATING OUTCOME</span>
+            <div class="summary-stat"><small>FINAL CASH</small><b id="finalCash">₹0</b></div>
+            <div class="summary-stat"><small>MILK DELIVERED</small><b id="finalDelivered">0 L</b></div>
+            <div class="summary-stat"><small>FARMER TRUST</small><b id="finalTrust">0</b></div>
+            <div class="summary-stat"><small>ROUNDS COMPLETED</small><b>05 / 05</b></div>
+          </div>
+        </div>
+
+        <div class="results-card leaderboard-card">
+          <div class="card-head"><div><span>02 · FINAL LEADERBOARD</span><h3>Who kept the cooperative alive?</h3></div><span class="muted small">CPI · cumulative performance</span></div>
+          <div id="leaderboardRows" class="leaderboard"></div>
+        </div>
+
+        <div class="closure-card">
+          <div>
+            <div class="eyebrow">03 · CLOSURE</div>
+            <h2 id="closureTitle">The route ends here.</h2>
+            <p id="closureText">Every decision had a cost. Every disruption tested the system. Your final score reflects how well your team balanced efficiency, finance, service, quality, farmer trust and resilience.</p>
+          </div>
+          <div class="closure-actions">
+            <button class="btn primary" onclick="showJoin()">PLAY AGAIN <span>↗</span></button>
+            <button class="btn ghost" onclick="go('landing')">EXIT TO HOME</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <section id="admin" class="screen"><div class="panel"><div class="eyebrow">ORGANISER CONTROL</div><h2>Command centre.</h2><div class="admin-grid"><div class="admin-stat"><span>ROUND</span><b id="adminRound">01</b></div><div class="admin-stat"><span>TEAMS ALIVE</span><b id="adminAlive">12</b></div><div class="admin-stat"><span>EVENT</span><b id="adminEvent">STANDBY</b></div></div><div class="admin-actions"><button class="btn primary" onclick="triggerEvent()">TRIGGER DISRUPTION</button><button class="btn ghost" onclick="nextRound()">ADVANCE ROUND</button><button class="btn ghost" onclick="resetDemo()">RESET DEMO</button></div><p class="muted small">Demo admin controls are local to this browser. The live deployment should connect these controls to Supabase so every participant sees the same state.</p></div></section>
   </main>
   <div id="toast" class="toast"></div>
