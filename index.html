@@ -24,7 +24,7 @@
           <h1>MILK<br><em>ROUTE</em></h1>
           <p class="hero-sub">Keep the milk moving. Keep the cooperative alive.</p>
           <p class="muted">A strategic supply-chain war room set inside a village dairy cooperative in Gujarat. Five rounds. Limited resources. Real trade-offs. One team standing.</p>
-          <div class="cta-row"><button class="btn primary" onclick="showJoin()">ENTER THE SIMULATION <span>↗</span></button><button class="btn ghost" onclick="showRules()">HOW IT WORKS</button></div>
+          <div class="cta-row"><button class="btn primary" onclick="showJoin()">ENTER THE SIMULATION <span>↗</span></button><button class="btn ghost" onclick="showRules()">HOW IT WORKS</button><button class="text-btn" onclick="showAdmin()">ORGANISER</button></div>
         </div>
         <div class="hero-visual">
           <div class="route-map">
@@ -41,7 +41,7 @@
     </section>
 
     <section id="join" class="screen">
-      <div class="panel narrow"><div class="eyebrow">TEAM ACCESS</div><h2>Enter the control room.</h2><p class="muted">For the live version, enter the game code supplied by Pravartana. Demo mode works immediately in this browser.</p>
+      <div class="panel narrow"><div class="eyebrow">TEAM ACCESS</div><h2>Enter the control room.</h2><p class="muted">Enter the live game code supplied by the Pravartana organiser. Every team joining the same code shares the same round, disruption and leaderboard in real time.</p>
         <label>GAME CODE<input id="gameCode" value="PRAV-OPS" /></label>
         <label>TEAM NAME<input id="teamName" placeholder="e.g. Dairy Titans" /></label>
         <label>TEAM MEMBERS<input id="members" placeholder="Aarav, Meera, Kabir, Riya" /></label>
@@ -110,9 +110,10 @@
       </div>
     </section>
 
-    <section id="admin" class="screen"><div class="panel"><div class="eyebrow">ORGANISER CONTROL</div><h2>Command centre.</h2><div class="admin-grid"><div class="admin-stat"><span>ROUND</span><b id="adminRound">01</b></div><div class="admin-stat"><span>TEAMS ALIVE</span><b id="adminAlive">12</b></div><div class="admin-stat"><span>EVENT</span><b id="adminEvent">STANDBY</b></div></div><div class="admin-actions"><button class="btn primary" onclick="triggerEvent()">TRIGGER DISRUPTION</button><button class="btn ghost" onclick="nextRound()">ADVANCE ROUND</button><button class="btn ghost" onclick="resetDemo()">RESET DEMO</button></div><p class="muted small">Demo admin controls are local to this browser. The live deployment should connect these controls to Supabase so every participant sees the same state.</p></div></section>
+    <section id="admin" class="screen"><div class="panel"><div class="eyebrow">ORGANISER CONTROL</div><h2>Command centre.</h2><label>LIVE ROOM CODE<input id="adminCode" value="PRAV-OPS" /></label><div class="admin-actions"><button class="btn primary" onclick="createLiveRoom()">CREATE LIVE ROOM</button><button class="btn ghost" onclick="connectAdmin()">CONNECT TO ROOM</button></div><p class="muted small">Share this code with every team. Teams must join the same code to enter the same live simulation.</p><p class="eyebrow">ACTIVE ROOM · <strong id="adminRoomCode">—</strong></p><div class="admin-grid"><div class="admin-stat"><span>ROUND</span><b id="adminRound">01</b></div><div class="admin-stat"><span>TEAMS ALIVE</span><b id="adminAlive">12</b></div><div class="admin-stat"><span>EVENT</span><b id="adminEvent">STANDBY</b></div></div><div class="admin-actions"><button class="btn primary" onclick="triggerEvent()">TRIGGER DISRUPTION</button><button class="btn ghost" onclick="nextRound()">ADVANCE ROUND</button><button class="btn ghost" onclick="resetDemo()">RESET DEMO</button></div><p class="muted small">In live mode, these controls write the shared room state. Advancing the round moves every connected team together. The organiser should keep this panel open during the competition.</p></div></section>
   </main>
   <div id="toast" class="toast"></div>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="app.js"></script>
 </body>
 </html>
