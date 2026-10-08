@@ -1,0 +1,10 @@
+create table if not exists public.game_sessions (id uuid primary key default gen_random_uuid(), code text unique not null, round integer not null default 1, status text not null default 'lobby', event jsonb, settings jsonb not null default '{}'::jsonb, created_at timestamptz not null default now());
+create table if not exists public.teams (id uuid primary key default gen_random_uuid(), session_id uuid not null references public.game_sessions(id) on delete cascade, name text not null, members text, cash numeric not null default 100000, trust numeric not null default 82, score numeric not null default 0, alive boolean not null default true, decisions jsonb not null default '{}'::jsonb, created_at timestamptz not null default now());
+alter table public.game_sessions enable row level security;
+alter table public.teams enable row level security;
+create policy "read sessions" on public.game_sessions for select using (true);
+create policy "read teams" on public.teams for select using (true);
+create policy "create teams" on public.teams for insert with check (true);
+create policy "update teams" on public.teams for update using (true) with check (true);
+alter publication supabase_realtime add table public.game_sessions;
+alter publication supabase_realtime add table public.teams;
